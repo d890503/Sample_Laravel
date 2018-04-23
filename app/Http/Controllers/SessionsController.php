@@ -7,6 +7,16 @@ use Illuminate\Support\Facades\Auth;
 
 class SessionsController extends Controller
 {
+    public function __construct()
+    {
+        //使用 Auth 中间件提供的 guest 选项，
+        //用于指定一些只允许未登录用户访问的动作，
+        //因此我们需要通过对 guest 属性进行设置，只让未登录用户访问登录页面和注册页面。
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     public function create()
     {
         return view('sessions.create');
@@ -21,7 +31,7 @@ class SessionsController extends Controller
 
         if (Auth::attempt($credentials, $request->has('remeber'))) {
             session()->flash('success', '欢迎回来！');
-            return redirect()->route('users.show', [Auth::user()]);
+            return redirect()->intended(route('users.show', [Auth::user()]));
         } else {
             session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
             return redirect()->back();
